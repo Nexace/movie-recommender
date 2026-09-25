@@ -1,0 +1,329 @@
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --bg-card: #1e1e1e;
+  --bg-card-hover: #282828;
+  --accent-brown: #b8864a;
+  --accent-brown-dim: rgba(184, 134, 74, 0.15);
+  --accent-brown-glow: rgba(184, 134, 74, 0.5);
+  --accent-silver: #909090;
+  --accent-bronze: #a0784c;
+  --accent-gold: #c9a84c;
+  --text-primary: #e8e8e8;
+  --text-secondary: #999999;
+  --text-muted: #666666;
+  --border: #2e2e2e;
+  --border-hover: #3e3e3e;
+  --glass-bg: rgba(30, 30, 30, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-heading: var(--font-display);
+  --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent-brown);
+  outline-offset: 2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1, h2 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+input, textarea, select {
+  font-family: var(--font-sans);
+}
+
+a {
+  color: var(--accent-brown);
+  text-decoration: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Slow drift of the poster wall; runs on the compositor instead of a JS loop. */
+.poster-drift {
+  animation: poster-drift 40s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes poster-drift {
+  from { transform: translate3d(-8px, -5px, 0); }
+  to { transform: translate3d(8px, 5px, 0); }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hover-accent-border:not([aria-pressed="true"]):hover {
+  border-color: var(--accent-brown) !important;
+}
+
+.nav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.h-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) transparent;
+}
+
+.h-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+/* Background posters. Each one's tilt, size and opacity come in as --r, --s and --o. */
+.bg-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  user-select: none;
+  transform: rotate(var(--r)) scale(var(--s));
+  opacity: var(--o);
+  backface-visibility: hidden;
+}
+
+/* The new poster rises in underneath; paused until its image has loaded. */
+.poster-in {
+  animation: poster-in 2.4s cubic-bezier(0.33, 0, 0.2, 1) both paused;
+}
+
+/* The old poster lingers on top a moment, then dissolves with a slight push-in,
+   so the slot never dips to empty mid-crossfade. */
+.poster-out {
+  animation: poster-out 2.4s cubic-bezier(0.45, 0, 0.55, 1) 0.6s both;
+}
+
+@keyframes poster-in {
+  from { opacity: 0; transform: rotate(var(--r)) scale(calc(var(--s) * 0.94)); }
+  to { opacity: var(--o); transform: rotate(var(--r)) scale(var(--s)); }
+}
+
+@keyframes poster-out {
+  from { opacity: var(--o); transform: rotate(var(--r)) scale(var(--s)); }
+  to { opacity: 0; transform: rotate(var(--r)) scale(calc(var(--s) * 1.03)); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--accent-brown-glow); }
+  50% { box-shadow: 0 0 40px var(--accent-brown-glow), 0 0 60px rgba(139, 107, 74, 0.2); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+  }
+
+  html { font-size: 15px; }
+
+  body { -webkit-tap-highlight-color: transparent; }
+
+  /* Keeps iOS Safari from zooming into focused fields. */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  .grain-overlay { display: none; }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  html { font-size: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+
+  /* Background posters keep a slow, motion-free crossfade instead of popping. */
+  .poster-in {
+    animation-name: poster-fade-in !important;
+    animation-duration: 2.4s !important;
+  }
+  .poster-out {
+    animation-name: poster-fade-out !important;
+    animation-duration: 2.4s !important;
+  }
+}
+
+@keyframes poster-fade-in {
+  from { opacity: 0; }
+  to { opacity: var(--o); }
+}
+
+@keyframes poster-fade-out {
+  from { opacity: var(--o); }
+  to { opacity: 0; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"], [draggable="true"] {
+    touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #b8864a, #d4a85c, #e8c88a, #b8864a);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
